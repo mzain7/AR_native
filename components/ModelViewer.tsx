@@ -1,5 +1,5 @@
 import React from 'react';
-import { StyleSheet, Modal, View, Pressable } from 'react-native';
+import { StyleSheet, Modal, View, Pressable, Linking } from 'react-native';
 import { WebView } from 'react-native-webview';
 import { X } from 'lucide-react-native';
 
@@ -9,7 +9,11 @@ interface ModelViewerProps {
   onClose: () => void;
 }
 
-export default function ModelViewer({ visible, modelUrl, onClose }: ModelViewerProps) {
+export default function ModelViewer({
+  visible,
+  modelUrl,
+  onClose,
+}: ModelViewerProps) {
   const htmlContent = `
     <!DOCTYPE html>
     <html>
@@ -17,7 +21,7 @@ export default function ModelViewer({ visible, modelUrl, onClose }: ModelViewerP
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
         <style>
-          body { margin: 0; }
+          body { margin: 0; overflow: hidden; }
           model-viewer {
             width: 100%;
             height: 100vh;
@@ -27,18 +31,42 @@ export default function ModelViewer({ visible, modelUrl, onClose }: ModelViewerP
       </head>
       <body>
         <model-viewer
+          id="arViewer"
           src="${modelUrl}"
-          camera-controls
-          auto-rotate
           ar
           ar-modes="webxr scene-viewer quick-look"
+          camera-controls
+          auto-rotate
           shadow-intensity="1"
-          exposure="1"
-          style="background-color: #f5f5f5;">
+          interaction-prompt="auto"
+          disable-zoom
+          camera-orbit="0deg 90deg auto"
+          environment-image="neutral"
+          reveal="auto"
+        >
         </model-viewer>
       </body>
     </html>
   `;
+
+  // Handles AR link redirection
+  const handleNavigation = (event: any) => {
+    const url = event.url;
+
+    if (url.startsWith('intent://')) {
+      // Convert 'intent://' URL to a usable 'https://' fallback URL
+      const fixedUrl = url
+        .replace('intent://', 'https://')
+        .split('#Intent;')[0];
+
+      Linking.openURL(fixedUrl).catch((err) =>
+        console.error('Failed to open AR link', err)
+      );
+      return false; // Prevent WebView from handling it
+    }
+
+    return true; // Allow normal navigation
+  };
 
   return (
     <Modal visible={visible} animationType="slide" onRequestClose={onClose}>
@@ -54,6 +82,7 @@ export default function ModelViewer({ visible, modelUrl, onClose }: ModelViewerP
           javaScriptEnabled
           domStorageEnabled
           startInLoadingState
+          onShouldStartLoadWithRequest={handleNavigation} // 🔥 Handles AR activation
         />
       </View>
     </Modal>
@@ -77,10 +106,7 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     padding: 8,
     shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
+    shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
     elevation: 5,
