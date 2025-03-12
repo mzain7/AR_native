@@ -31,20 +31,33 @@ export default function ModelViewer({
       </head>
       <body>
         <model-viewer
-          id="arViewer"
-          src="${modelUrl}"
-          ar
-          ar-modes="webxr scene-viewer quick-look"
-          camera-controls
-          auto-rotate
-          shadow-intensity="1"
-          interaction-prompt="auto"
-          disable-zoom
-          camera-orbit="0deg 90deg auto"
-          environment-image="neutral"
-          reveal="auto"
-        >
-        </model-viewer>
+  id="arViewer"
+  src="${modelUrl}"
+  ar
+  ar-modes="webxr scene-viewer quick-look"
+  camera-controls
+  auto-rotate
+  shadow-intensity="1"
+  touch-action="pan-y"
+  interaction-prompt="auto"
+  min-camera-orbit="auto auto auto"
+  max-camera-orbit="auto auto auto"
+  min-field-of-view="10deg"
+  max-field-of-view="45deg"
+  disable-tap
+  environment-image="neutral"
+  poster=""
+  reveal="auto"
+  camera-orbit="0deg 75deg auto"
+  camera-target="auto auto auto"
+  field-of-view="30deg"
+  auto-rotate-delay="2000"
+  zoom
+  gesture-config="pan-y rotation zoom"
+  ar-placement="floor"
+>
+</model-viewer>
+
       </body>
     </html>
   `;
